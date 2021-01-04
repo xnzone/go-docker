@@ -16,13 +16,14 @@ import (
 
 // Info
 type Info struct {
-	Pid         string `json:"pid"`        // init pid
-	Id          string `json:"id"`         // container id
-	Name        string `json:"name"`       // container name
-	Command     string `json:"command"`    // init command
-	CreatedTime string `json:"createTime"` // create time
-	Status      string `json:"status"`     // container status
-	Volume      string `json:"volume"`     // container volume
+	Pid         string   `json:"pid"`          // init pid
+	Id          string   `json:"id"`           // container id
+	Name        string   `json:"name"`         // container name
+	Command     string   `json:"command"`      // init command
+	CreatedTime string   `json:"createTime"`   // create time
+	Status      string   `json:"status"`       // container status
+	Volume      string   `json:"volume"`       // container volume
+	PortMapping []string `json:"port_mapping"` // port mapping
 }
 
 // RecordContainerInfo ...
