@@ -12,7 +12,7 @@ import (
 
 // Run ...
 func Run(tty bool, commands []string, res *subsystem.ResourceConfig, volume string, cname string) {
-	parent, wpipe := container.NewParentProcess(tty, volume)
+	parent, wpipe := container.NewParentProcess(tty, volume, cname)
 
 	if parent == nil {
 		logrus.Errorf("new parent process error")
