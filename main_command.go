@@ -5,7 +5,9 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 	"go-docker/cgroups/subsystem"
+	"go-docker/common"
 	"go-docker/container"
+	"os"
 )
 
 var runCommand = cli.Command{
@@ -115,6 +117,28 @@ var logCommand = cli.Command{
 		}
 		cname := ctx.Args().Get(0)
 		container.Logs(cname)
+		return nil
+	},
+}
+
+var execCommand = cli.Command{
+	Name:  "exec",
+	Usage: "exec a command into container",
+	Action: func(ctx *cli.Context) error {
+		if os.Getenv(common.EnvExecPid) != "" {
+			log.Infof("pid callback pid %d", os.Getgid())
+			return nil
+		}
+
+		if len(ctx.Args()) < 2 {
+			return fmt.Errorf("missing container name or command")
+		}
+		cname := ctx.Args().Get(0)
+		var commands []string
+		for _, arg := range ctx.Args().Tail() {
+			commands = append(commands, arg)
+		}
+		container.Exec(cname, commands)
 		return nil
 	},
 }

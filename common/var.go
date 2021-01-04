@@ -17,3 +17,8 @@ const (
 	ContainerInfoFileName    = "config.json"
 	ContainerLogFileName     = "container.log"
 )
+
+const (
+	EnvExecPid = "docker_pid"
+	EnvExecCmd = "docker_cmd"
+)
