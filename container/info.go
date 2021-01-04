@@ -135,3 +135,19 @@ func getContainerInfo(file os.FileInfo) (*ContainerInfo, error) {
 	}
 	return &info, nil
 }
+
+func getInfoByName(cname string) (*ContainerInfo, error) {
+	dir := fmt.Sprintf(common.DefaultContainerInfoPath, cname)
+	cfp := dir + common.ContainerInfoFileName
+	cbytes, err := ioutil.ReadFile(cfp)
+	if err != nil {
+		logrus.Errorf("read file %s error %v", cfp, err)
+		return nil, err
+	}
+	var info ContainerInfo
+	if err := json.Unmarshal(cbytes, &info); err != nil {
+		logrus.Errorf("GetContainerInfoByName unmarshal error %v", err)
+		return nil, err
+	}
+	return &info, nil
+}
