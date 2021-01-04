@@ -2,6 +2,7 @@ package container
 
 import (
 	"github.com/sirupsen/logrus"
+	"go-docker/common"
 	"os"
 	"os/exec"
 	"strings"
@@ -45,7 +46,7 @@ func CreateReadOnlyLayer(rootURL string) {
 
 // CreateWriteLayer create a container layer as an only writeable layer
 func CreateWriteLayer(rootURL string) {
-	writeURL := rootURL + "writeLayer/"
+	writeURL := rootURL + common.WriteLayer + "/"
 	if err := os.Mkdir(writeURL, 0777); err != nil {
 		logrus.Errorf("mkdir dir %s error. %v", writeURL, err)
 	}
@@ -58,7 +59,7 @@ func CreateMountPoint(rootURL string, mntURL string) {
 		logrus.Errorf("mkdir dir %s error. %v", mntURL, err)
 	}
 
-	dirs := "dirs=" + rootURL + "writeLayer" + rootURL + "busybox"
+	dirs := "dirs=" + rootURL + common.WriteLayer + ":" + rootURL + "busybox"
 	cmd := exec.Command("mount", "-t", "aufs", "-o", dirs, "none", mntURL)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -98,7 +99,7 @@ func DeleteMountPoint(rootURL string, mntURL string) {
 
 // DeleteWriteLayer ...
 func DeleteWriteLayer(rootURL string) {
-	writeURL := rootURL + "writeLayer/"
+	writeURL := rootURL + common.WriteLayer + "/"
 	if err := os.RemoveAll(writeURL); err != nil {
 		logrus.Errorf("remove dir %s error %v", writeURL, err)
 	}
