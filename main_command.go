@@ -16,6 +16,11 @@ var runCommand = cli.Command{
 			Name:  "ti",
 			Usage: "enable tty",
 		},
+		// add volume tag
+		cli.StringFlag{
+			Name:  "v",
+			Usage: "volume",
+		},
 	},
 
 	Action: func(ctx *cli.Context) error {
@@ -32,7 +37,8 @@ var runCommand = cli.Command{
 			commands = append(commands, arg)
 		}
 		tty := ctx.Bool("ti")
-		Run(tty, commands, res)
+		volume := ctx.String("v")
+		Run(tty, commands, res, volume)
 		return nil
 	},
 }
