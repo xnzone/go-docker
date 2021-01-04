@@ -4,6 +4,7 @@ import (
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
+	"go-docker/cgroups/subsystem"
 	"go-docker/container"
 )
 
@@ -21,9 +22,17 @@ var runCommand = cli.Command{
 		if len(ctx.Args()) < 1 {
 			return fmt.Errorf("missing container command")
 		}
-		cmd := ctx.Args().Get(0)
+		res := &subsystem.ResourceConfig{
+			MemoryLimit: ctx.String("m"),
+			CpuSet:      ctx.String("cpuset"),
+			CpuShare:    ctx.String("cpushare"),
+		}
+		var commands []string
+		for _, arg := range ctx.Args().Tail() {
+			commands = append(commands, arg)
+		}
 		tty := ctx.Bool("ti")
-		Run(tty, cmd)
+		Run(tty, commands, res)
 		return nil
 	},
 }

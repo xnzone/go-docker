@@ -1,3 +1,4 @@
-.idea
-bin
 go.sum
+bin
+go-docker
+.idea
