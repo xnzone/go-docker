@@ -4,15 +4,14 @@ import (
 	"github.com/sirupsen/logrus"
 	"go-docker/cgroups"
 	"go-docker/cgroups/subsystem"
-	"go-docker/common"
 	"go-docker/container"
 	"os"
 	"strings"
 )
 
 // Run ...
-func Run(tty bool, commands []string, res *subsystem.ResourceConfig, volume string, cname string) {
-	parent, wpipe := container.NewParentProcess(tty, volume, cname)
+func Run(tty bool, commands []string, res *subsystem.ResourceConfig, volume string, cname string, iname string) {
+	parent, wpipe := container.NewParentProcess(tty, volume, cname, iname)
 
 	if parent == nil {
 		logrus.Errorf("new parent process error")
@@ -23,7 +22,7 @@ func Run(tty bool, commands []string, res *subsystem.ResourceConfig, volume stri
 	}
 
 	// record container info
-	if err := container.RecordContainerInfo(parent.Process.Pid, commands, cname); err != nil {
+	if err := container.RecordContainerInfo(parent.Process.Pid, commands, cname, volume); err != nil {
 		logrus.Errorf("record container info error %v", err)
 		return
 	}
@@ -40,9 +39,7 @@ func Run(tty bool, commands []string, res *subsystem.ResourceConfig, volume stri
 		container.DeleteContainerInfo(cname)
 	}
 
-	mntURl := common.MntPath
-	rootURL := common.RootPath
-	container.DeleteWorkSpace(rootURL, mntURl, volume)
+	container.DeleteWorkSpace(volume, cname)
 	os.Exit(-1)
 }
 

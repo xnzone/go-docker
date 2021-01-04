@@ -45,7 +45,7 @@ func getPidByName(cname string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	var info ContainerInfo
+	var info Info
 	if err := json.Unmarshal(cbytes, &info); err != nil {
 		return "", err
 	}

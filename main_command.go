@@ -68,7 +68,11 @@ var runCommand = cli.Command{
 			return fmt.Errorf("ti and d param can not both provided")
 		}
 		cname := ctx.String("name")
-		Run(tty, commands, res, volume, cname)
+		// get image name
+		iname := commands[0]
+		commands = commands[1:]
+
+		Run(tty, commands, res, volume, cname, iname)
 		return nil
 	},
 }
@@ -92,9 +96,10 @@ var commitCommand = cli.Command{
 		if len(ctx.Args()) < 1 {
 			return fmt.Errorf("missing container name")
 		}
-		imageName := ctx.Args().Get(0)
+		cname := ctx.Args().Get(0)
+		iname := ctx.Args().Get(1)
 		// commit container
-		container.CommitContainer(imageName)
+		container.Commit(cname, iname)
 		return nil
 	},
 }
@@ -152,6 +157,19 @@ var stopCommand = cli.Command{
 		}
 		cname := ctx.Args().Get(0)
 		container.Stop(cname)
+		return nil
+	},
+}
+
+var removeCommand = cli.Command{
+	Name:  "rm",
+	Usage: "remove unused containers",
+	Action: func(ctx *cli.Context) error {
+		if len(ctx.Args()) < 1 {
+			return fmt.Errorf("misssing container name")
+		}
+		cname := ctx.Args().Get(0)
+		container.Remove(cname)
 		return nil
 	},
 }
