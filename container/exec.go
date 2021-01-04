@@ -32,6 +32,9 @@ func Exec(cname string, commands []string) {
 	os.Setenv(common.EnvExecPid, pid)
 	os.Setenv(common.EnvExecCmd, cmdstr)
 
+	cenvs := getEnvsByPid(pid)
+	cmd.Env = append(os.Environ(), cenvs...)
+
 	if err := cmd.Run(); err != nil {
 		logrus.Errorf("exec container %s error %v", cname, err)
 	}
