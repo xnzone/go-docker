@@ -31,7 +31,7 @@ make and cd ./bin
 ./go-docker rm test
 ```
 
-## knowledges
+## knowledge
 ### namespace
 - uts: isolate host
 - pid: isolate process pid
