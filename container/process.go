@@ -1,6 +1,7 @@
 package container
 
 import (
+	"fmt"
 	"github.com/sirupsen/logrus"
 	"go-docker/common"
 	"os"
@@ -9,7 +10,7 @@ import (
 )
 
 // NewParentProcess ...
-func NewParentProcess(tty bool, volume string) (*exec.Cmd, *os.File) {
+func NewParentProcess(tty bool, volume string, cname string) (*exec.Cmd, *os.File) {
 	rpipe, wpipe, err := os.Pipe()
 	if err != nil {
 		logrus.Errorf("new pipe error %v", err)
@@ -25,6 +26,20 @@ func NewParentProcess(tty bool, volume string) (*exec.Cmd, *os.File) {
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
+	} else {
+		// print to log file
+		dir := fmt.Sprintf(common.DefaultContainerInfoPath, cname)
+		if err := os.MkdirAll(dir, 0622); err != nil {
+			logrus.Errorf("NewParentProcess mkdir %s error %v", dir, err)
+			return nil, nil
+		}
+		lpath := dir + common.ContainerLogFileName
+		lfile, err := os.Create(lpath)
+		if err != nil {
+			logrus.Errorf("NewParentProcess create file %s error %v", lpath, err)
+			return nil, nil
+		}
+		cmd.Stdout = lfile
 	}
 	cmd.ExtraFiles = []*os.File{rpipe}
 	// replace /root/busybox as /root/mnt
