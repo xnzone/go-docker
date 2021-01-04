@@ -5,12 +5,14 @@ import (
 	"go-docker/cgroups"
 	"go-docker/cgroups/subsystem"
 	"go-docker/container"
+	"go-docker/network"
 	"os"
+	"strconv"
 	"strings"
 )
 
 // Run ...
-func Run(tty bool, commands []string, res *subsystem.ResourceConfig, volume string, cname string, iname string, envs []string) {
+func Run(tty bool, commands []string, res *subsystem.ResourceConfig, volume string, cname string, iname string, envs []string, net string, ports []string) {
 	cid := container.GenContainerID(10)
 	if cname == "" {
 		cname = cid
@@ -36,6 +38,24 @@ func Run(tty bool, commands []string, res *subsystem.ResourceConfig, volume stri
 
 	cmanager.Set(res)
 	cmanager.Apply(parent.Process.Pid)
+
+	if net != "" && len(net) > 0 {
+		err := network.Init()
+		if err != nil {
+			logrus.Errorf("network init failed, err %v", err)
+			return
+		}
+		cinfo := &container.Info{
+			Id:          cid,
+			Pid:         strconv.Itoa(parent.Process.Pid),
+			Name:        cname,
+			PortMapping: ports,
+		}
+		if err := network.Connect(net, cinfo); err != nil {
+			logrus.Errorf("connect network err %v", err)
+			return
+		}
+	}
 
 	sendInitCommand(commands, wpipe)
 	if tty {
