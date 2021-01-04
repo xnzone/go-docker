@@ -14,25 +14,27 @@ import (
 	"time"
 )
 
-// ContainerInfo
-type ContainerInfo struct {
+// Info
+type Info struct {
 	Pid         string `json:"pid"`        // init pid
 	Id          string `json:"id"`         // container id
 	Name        string `json:"name"`       // container name
 	Command     string `json:"command"`    // init command
 	CreatedTime string `json:"createTime"` // create time
 	Status      string `json:"status"`     // container status
+	Volume      string `json:"volume"`     // container volume
 }
 
 // RecordContainerInfo ...
-func RecordContainerInfo(pid int, commands []string, cname string) error {
-	info := &ContainerInfo{
+func RecordContainerInfo(pid int, commands []string, cname string, volume string) error {
+	info := &Info{
 		Id:          GenContainerID(10),
 		Pid:         strconv.Itoa(pid),
 		Command:     strings.Join(commands, ""),
 		CreatedTime: time.Now().Format("2006-01-02 15:04:05"),
 		Status:      common.Running,
 		Name:        cname,
+		Volume:      volume,
 	}
 	bt, err := json.Marshal(info)
 	if err != nil {
@@ -80,7 +82,7 @@ func ListContainers() {
 		return
 	}
 
-	var containers []*ContainerInfo
+	var containers []*Info
 	for _, file := range files {
 		tmp, err := getContainerInfo(file)
 		if err != nil {
@@ -118,7 +120,7 @@ func GenContainerID(n int) string {
 	return string(b)
 }
 
-func getContainerInfo(file os.FileInfo) (*ContainerInfo, error) {
+func getContainerInfo(file os.FileInfo) (*Info, error) {
 	cname := file.Name()
 	cfdir := fmt.Sprintf(common.DefaultContainerInfoPath, cname)
 	cfdir = cfdir + common.ContainerInfoFileName
@@ -128,7 +130,7 @@ func getContainerInfo(file os.FileInfo) (*ContainerInfo, error) {
 		logrus.Errorf("read file %s error %v", cfdir, err)
 		return nil, err
 	}
-	var info ContainerInfo
+	var info Info
 	if err := json.Unmarshal(content, &info); err != nil {
 		logrus.Errorf("json unmarshal error %v", err)
 		return nil, err
@@ -136,7 +138,7 @@ func getContainerInfo(file os.FileInfo) (*ContainerInfo, error) {
 	return &info, nil
 }
 
-func getInfoByName(cname string) (*ContainerInfo, error) {
+func getInfoByName(cname string) (*Info, error) {
 	dir := fmt.Sprintf(common.DefaultContainerInfoPath, cname)
 	cfp := dir + common.ContainerInfoFileName
 	cbytes, err := ioutil.ReadFile(cfp)
@@ -144,7 +146,7 @@ func getInfoByName(cname string) (*ContainerInfo, error) {
 		logrus.Errorf("read file %s error %v", cfp, err)
 		return nil, err
 	}
-	var info ContainerInfo
+	var info Info
 	if err := json.Unmarshal(cbytes, &info); err != nil {
 		logrus.Errorf("GetContainerInfoByName unmarshal error %v", err)
 		return nil, err
