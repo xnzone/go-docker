@@ -1,0 +1,19 @@
+package common
+
+const (
+	RootPath   = "/root/"
+	MntPath    = "/root/mnt/"
+	WriteLayer = "writeLayer"
+)
+
+const (
+	Running = "running"
+	Stop    = "stopped"
+	Exit    = "exited"
+)
+
+const (
+	DefaultContainerInfoPath = "/var/run/go-docker/%s/"
+	ContainerInfoFileName    = "config.json"
+	ContainerLogFileName     = "container.log"
+)

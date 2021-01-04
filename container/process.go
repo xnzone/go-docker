@@ -2,6 +2,7 @@ package container
 
 import (
 	"github.com/sirupsen/logrus"
+	"go-docker/common"
 	"os"
 	"os/exec"
 	"syscall"
@@ -27,8 +28,8 @@ func NewParentProcess(tty bool, volume string) (*exec.Cmd, *os.File) {
 	}
 	cmd.ExtraFiles = []*os.File{rpipe}
 	// replace /root/busybox as /root/mnt
-	mntURL := "/root/mnt/"
-	rootURL := "/root/"
+	mntURL := common.MntPath
+	rootURL := common.RootPath
 	NewWorkSpace(rootURL, mntURL, volume)
 	cmd.Dir = mntURL
 

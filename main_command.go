@@ -38,6 +38,11 @@ var runCommand = cli.Command{
 			Name:  "cpuset",
 			Usage: "cpuset limit",
 		},
+		// -name to name container
+		cli.StringFlag{
+			Name:  "name",
+			Usage: "container name",
+		},
 	},
 
 	Action: func(ctx *cli.Context) error {
@@ -60,7 +65,8 @@ var runCommand = cli.Command{
 		if tty && detach {
 			return fmt.Errorf("ti and d param can not both provided")
 		}
-		Run(tty, commands, res, volume)
+		cname := ctx.String("name")
+		Run(tty, commands, res, volume, cname)
 		return nil
 	},
 }
@@ -87,6 +93,15 @@ var commitCommand = cli.Command{
 		imageName := ctx.Args().Get(0)
 		// commit container
 		container.CommitContainer(imageName)
+		return nil
+	},
+}
+
+var listCommand = cli.Command{
+	Name:  "ps",
+	Usage: "list all containers",
+	Action: func(ctx *cli.Context) error {
+		container.ListContainers()
 		return nil
 	},
 }
