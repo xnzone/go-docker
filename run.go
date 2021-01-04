@@ -27,7 +27,9 @@ func Run(tty bool, commands []string, res *subsystem.ResourceConfig, volume stri
 	cmanager.Apply(parent.Process.Pid)
 
 	sendInitCommand(commands, wpipe)
-	parent.Wait()
+	if tty {
+		parent.Wait()
+	}
 
 	mntURl := "/root/mnt"
 	rootURL := "/root"

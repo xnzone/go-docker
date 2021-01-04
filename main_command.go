@@ -21,6 +21,23 @@ var runCommand = cli.Command{
 			Name:  "v",
 			Usage: "volume",
 		},
+		// add -d tag
+		cli.BoolFlag{
+			Name:  "d",
+			Usage: "detach container",
+		},
+		cli.StringFlag{
+			Name:  "m",
+			Usage: "memory limit",
+		},
+		cli.StringFlag{
+			Name:  "cpushare",
+			Usage: "cpushare limit",
+		},
+		cli.StringFlag{
+			Name:  "cpuset",
+			Usage: "cpuset limit",
+		},
 	},
 
 	Action: func(ctx *cli.Context) error {
@@ -37,7 +54,12 @@ var runCommand = cli.Command{
 			commands = append(commands, arg)
 		}
 		tty := ctx.Bool("ti")
+		detach := ctx.Bool("d")
 		volume := ctx.String("v")
+		// tty and detach can't exist at the same time
+		if tty && detach {
+			return fmt.Errorf("ti and d param can not both provided")
+		}
 		Run(tty, commands, res, volume)
 		return nil
 	},
