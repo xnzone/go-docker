@@ -21,8 +21,10 @@ func RunContainerInitProcess(command string, args []string) error {
 }
 
 // NewParentProcess ...
-func NewParentProcess(tty bool, command string) *exec.Cmd {
-	args := []string{"init", command}
+func NewParentProcess(tty bool) (*exec.Cmd, *os.File) {
+	_, wpipe, _ := os.Pipe()
+	// 调用自身，传入init参数，执行initCommand
+	args := []string{"init"}
 	cmd := exec.Command("/proc/self/exe", args...)
 	cmd.SysProcAttr = &syscall.SysProcAttr{
 		Cloneflags: syscall.CLONE_NEWUTS | syscall.CLONE_NEWPID | syscall.CLONE_NEWNS | syscall.CLONE_NEWNET | syscall.CLONE_NEWIPC,
@@ -33,5 +35,5 @@ func NewParentProcess(tty bool, command string) *exec.Cmd {
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 	}
-	return cmd
+	return cmd, wpipe
 }
