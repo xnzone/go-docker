@@ -10,8 +10,12 @@ import (
 )
 
 // Run ...
-func Run(tty bool, commands []string, res *subsystem.ResourceConfig, volume string, cname string, iname string) {
-	parent, wpipe := container.NewParentProcess(tty, volume, cname, iname)
+func Run(tty bool, commands []string, res *subsystem.ResourceConfig, volume string, cname string, iname string, envs []string) {
+	cid := container.GenContainerID(10)
+	if cname == "" {
+		cname = cid
+	}
+	parent, wpipe := container.NewParentProcess(tty, volume, cname, iname, envs)
 
 	if parent == nil {
 		logrus.Errorf("new parent process error")

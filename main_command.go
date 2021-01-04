@@ -45,6 +45,11 @@ var runCommand = cli.Command{
 			Name:  "name",
 			Usage: "container name",
 		},
+		// env
+		cli.StringSliceFlag{
+			Name:  "e",
+			Usage: "set environment",
+		},
 	},
 
 	Action: func(ctx *cli.Context) error {
@@ -72,7 +77,9 @@ var runCommand = cli.Command{
 		iname := commands[0]
 		commands = commands[1:]
 
-		Run(tty, commands, res, volume, cname, iname)
+		envs := ctx.StringSlice("e")
+
+		Run(tty, commands, res, volume, cname, iname, envs)
 		return nil
 	},
 }

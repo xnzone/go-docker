@@ -153,3 +153,14 @@ func getInfoByName(cname string) (*Info, error) {
 	}
 	return &info, nil
 }
+
+func getEnvsByPid(pid string) []string {
+	// env path /proc/PID/environ
+	path := fmt.Sprintf("/proc/%s/environ", pid)
+	cbytes, err := ioutil.ReadFile(path)
+	if err != nil {
+		logrus.Errorf("read file %s error %v", path, err)
+		return nil
+	}
+	return strings.Split(string(cbytes), " \u0000")
+}

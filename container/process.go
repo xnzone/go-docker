@@ -10,7 +10,7 @@ import (
 )
 
 // NewParentProcess ...
-func NewParentProcess(tty bool, volume string, cname string, iname string) (*exec.Cmd, *os.File) {
+func NewParentProcess(tty bool, volume string, cname string, iname string, envs []string) (*exec.Cmd, *os.File) {
 	rpipe, wpipe, err := os.Pipe()
 	if err != nil {
 		logrus.Errorf("new pipe error %v", err)
@@ -42,6 +42,7 @@ func NewParentProcess(tty bool, volume string, cname string, iname string) (*exe
 		cmd.Stdout = lfile
 	}
 	cmd.ExtraFiles = []*os.File{rpipe}
+	cmd.Env = append(os.Environ(), envs...)
 	// replace /root/busybox as /root/mnt
 	// mntURL := common.MntPath
 	//rootURL := common.RootPath
