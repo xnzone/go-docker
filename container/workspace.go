@@ -4,13 +4,25 @@ import (
 	"github.com/sirupsen/logrus"
 	"os"
 	"os/exec"
+	"strings"
 )
 
 // NewWorkSpace ...
-func NewWorkSpace(rootURL string, mntURL string) {
+func NewWorkSpace(rootURL string, mntURL string, volume string) {
 	CreateReadOnlyLayer(rootURL)
 	CreateWriteLayer(rootURL)
 	CreateMountPoint(rootURL, mntURL)
+
+	if volume != "" {
+		volumes := volumeUrlExtract(volume)
+		length := len(volumes)
+		if length == 2 && volumes[0] != "" && volumes[1] != "" {
+			MountVolume(rootURL, mntURL, volumes)
+			logrus.Infof("%q", volumes)
+		} else {
+			logrus.Infof("volume parameter input is not correct.")
+		}
+	}
 }
 
 // CreateReadOnlyLayer ...
@@ -56,8 +68,18 @@ func CreateMountPoint(rootURL string, mntURL string) {
 }
 
 // DeleteWorkSpace ...
-func DeleteWorkSpace(rootURL string, mntURL string) {
-	DeleteMountPoint(rootURL, mntURL)
+func DeleteWorkSpace(rootURL string, mntURL string, volume string) {
+	if volume != "" {
+		volumes := volumeUrlExtract(volume)
+		length := len(volumes)
+		if length == 2 && volumes[0] != "" && volumes[1] != "" {
+			DeleteMountPointWithVolume(rootURL, mntURL, volumes)
+		} else {
+			DeleteMountPoint(rootURL, mntURL)
+		}
+	} else {
+		DeleteMountPoint(rootURL, mntURL)
+	}
 	DeleteWriteLayer(rootURL)
 }
 
@@ -82,6 +104,30 @@ func DeleteWriteLayer(rootURL string) {
 	}
 }
 
+// DeleteMountPointWithVolume ...
+func DeleteMountPointWithVolume(rootURL, mntURL string, volumes []string) {
+	// umount volume
+	curl := mntURL + volumes[1]
+	cmd := exec.Command("umount", curl)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		logrus.Errorf("umount volume failed. %v", err)
+	}
+	// umount mountpoint
+	cmd = exec.Command("umount", mntURL)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		logrus.Errorf("umount mountpoint failed. %v", err)
+	}
+	// delete mountpoint
+	if err := os.RemoveAll(mntURL); err != nil {
+		logrus.Infof("remove mountpoint dir %s error. %v", mntURL, err)
+	}
+
+}
+
 // PathExists ...
 func PathExists(path string) (bool, error) {
 	_, err := os.Stat(path)
@@ -92,4 +138,31 @@ func PathExists(path string) (bool, error) {
 		return false, nil
 	}
 	return false, err
+}
+
+// MountVolume ...
+func MountVolume(rootURL string, mntURL string, volumes []string) {
+	parentURL := volumes[0]
+	if err := os.Mkdir(parentURL, 0777); err != nil {
+		logrus.Infof("mkdir parent dir %s error. %v", parentURL, err)
+	}
+
+	curl := volumes[1]
+	cvurl := mntURL + curl
+	if err := os.Mkdir(cvurl, 0777); err != nil {
+		logrus.Infof("mkdir container dir %s error. %v", cvurl, err)
+	}
+
+	dirs := "dirs=" + parentURL
+	cmd := exec.Command("mount", "-t", "aufs", "-o", dirs, "none", cvurl)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		logrus.Errorf("mount volume failed. %v", err)
+	}
+}
+
+// volumeUrlExtract extract volume url
+func volumeUrlExtract(volume string) []string {
+	return strings.Split(volume, ":")
 }

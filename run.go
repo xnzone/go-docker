@@ -10,8 +10,8 @@ import (
 )
 
 // Run ...
-func Run(tty bool, commands []string, res *subsystem.ResourceConfig) {
-	parent, wpipe := container.NewParentProcess(tty)
+func Run(tty bool, commands []string, res *subsystem.ResourceConfig, volume string) {
+	parent, wpipe := container.NewParentProcess(tty, volume)
 
 	if parent == nil {
 		logrus.Errorf("new parent process error")
@@ -28,6 +28,10 @@ func Run(tty bool, commands []string, res *subsystem.ResourceConfig) {
 
 	sendInitCommand(commands, wpipe)
 	parent.Wait()
+
+	mntURl := "/root/mnt"
+	rootURL := "/root"
+	container.DeleteWorkSpace(rootURL, mntURl, volume)
 	os.Exit(-1)
 }
 
